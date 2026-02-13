@@ -13,6 +13,13 @@ export const authRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      if (process.env.DISABLE_REGISTRATION === 'true') {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Rejestracja jest wyłączona',
+        })
+      }
+
       const existing = await ctx.prisma.user.findUnique({
         where: { email: input.email },
       })

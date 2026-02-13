@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { trpc } from '@/lib/trpc/client'
 import { useAuth } from '@/lib/auth-context'
 
+const registrationDisabled = process.env.NEXT_PUBLIC_DISABLE_REGISTRATION === 'true'
+
 export default function RegisterPage() {
   const router = useRouter()
   const { login } = useAuth()
@@ -28,6 +30,20 @@ export default function RegisterPage() {
     e.preventDefault()
     setError('')
     registerMutation.mutate({ name, email, password })
+  }
+
+  if (registrationDisabled) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <div className="w-full max-w-sm text-center">
+          <h1 className="mb-8 text-3xl font-bold text-gray-900">Paśnik</h1>
+          <p className="mb-6 text-gray-600">Rejestracja nowych użytkowników jest wyłączona.</p>
+          <Link href="/login" className="font-medium text-green-600 hover:text-green-700">
+            Zaloguj się
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (

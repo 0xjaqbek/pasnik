@@ -80,12 +80,14 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
-          Nie masz konta?{' '}
-          <Link href="/register" className="font-medium text-green-600 hover:text-green-700">
-            Zarejestruj się
-          </Link>
-        </p>
+        {process.env.NEXT_PUBLIC_DISABLE_REGISTRATION !== 'true' && (
+          <p className="mt-6 text-center text-sm text-gray-500">
+            Nie masz konta?{' '}
+            <Link href="/register" className="font-medium text-green-600 hover:text-green-700">
+              Zarejestruj się
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   )
