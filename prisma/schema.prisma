@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -11,4 +5,191 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+
+  products          Product[]
+  recipes           Recipe[]
+  mealPlans         MealPlan[]
+  mealIdeas         MealIdea[]
+  shoppingListItems ShoppingListItem[]
+  notificationSettings NotificationSettings?
+  pushSubscriptions PushSubscription[]
+}
+
+enum ProductCategory {
+  NABIAL
+  MIESO
+  WARZYWA
+  OWOCE
+  PIECZYWO
+  SUCHE
+  MROZONKI
+  NAPOJE
+  INNE
+}
+
+enum ProductLocation {
+  LODOWKA
+  SPIZARNIA
+  ZAMRAZARKA
+}
+
+enum ProductUnit {
+  SZT
+  KG
+  G
+  L
+  ML
+}
+
+model Product {
+  id         String          @id @default(cuid())
+  userId     String
+  name       String
+  category   ProductCategory
+  location   ProductLocation
+  quantity   Float
+  unit       ProductUnit
+  expiryDate DateTime?
+  addedAt    DateTime        @default(now())
+  note       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiryDate])
+}
+
+enum RecipeSource {
+  USER
+  AI_GENERATED
+}
+
+model Recipe {
+  id          String       @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  instructions String
+  servings    Int
+  prepTime    Int?
+  cookTime    Int?
+  source      RecipeSource @default(USER)
+  createdAt   DateTime     @default(now())
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredients RecipeIngredient[]
+  mealPlans   MealPlan[]
+  mealIdeas   MealIdea[]
+
+  @@index([userId])
+}
+
+model RecipeIngredient {
+  id       String      @id @default(cuid())
+  recipeId String
+  name     String
+  quantity Float?
+  unit     ProductUnit?
+  optional Boolean     @default(false)
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}
+
+enum MealType {
+  SNIADANIE
+  DRUGIE_SNIADANIE
+  OBIAD
+  KOLACJA
+  PRZEKASKA
+}
+
+model MealPlan {
+  id       String   @id @default(cuid())
+  userId   String
+  date     DateTime @db.Date
+  mealType MealType
+  recipeId String
+  notes    String?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  shoppingListItems ShoppingListItem[]
+
+  @@index([userId, date])
+}
+
+enum MealIdeaPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model MealIdea {
+  id       String           @id @default(cuid())
+  userId   String
+  recipeId String
+  priority MealIdeaPriority @default(MEDIUM)
+  addedAt  DateTime         @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum ShoppingListSource {
+  AUTO_GENERATED
+  MANUAL
+}
+
+model ShoppingListItem {
+  id         String             @id @default(cuid())
+  userId     String
+  name       String
+  quantity   Float?
+  unit       ProductUnit?
+  category   ProductCategory?
+  checked    Boolean            @default(false)
+  source     ShoppingListSource @default(MANUAL)
+  mealPlanId String?
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mealPlan MealPlan? @relation(fields: [mealPlanId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+model NotificationSettings {
+  id                    String  @id @default(cuid())
+  userId                String  @unique
+  expiryEnabled         Boolean @default(true)
+  expiryDaysBefore      Int     @default(2)
+  expiredEnabled        Boolean @default(true)
+  missingIngredientsEnabled Boolean @default(true)
+  mealReminderEnabled   Boolean @default(true)
+  notificationHour      Int     @default(7)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PushSubscription {
+  id       String @id @default(cuid())
+  userId   String
+  endpoint String
+  p256dh   String
+  auth     String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
