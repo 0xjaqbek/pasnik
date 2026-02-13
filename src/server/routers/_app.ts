@@ -6,6 +6,7 @@ import { mealPlanRouter } from './mealPlan'
 import { mealIdeaRouter } from './mealIdea'
 import { shoppingListRouter } from './shoppingList'
 import { settingsRouter } from './settings'
+import { notificationRouter } from './notification'
 
 export const appRouter = router({
   auth: authRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   mealIdea: mealIdeaRouter,
   shoppingList: shoppingListRouter,
   settings: settingsRouter,
+  notification: notificationRouter,
 })
 
 export type AppRouter = typeof appRouter

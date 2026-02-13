@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { trpc } from '@/lib/trpc/client'
+import { subscribeToPush, unsubscribeFromPush, isPushSupported } from '@/lib/push'
 
 function Toggle({
   checked,
@@ -239,6 +240,116 @@ function ApiKeySection() {
   )
 }
 
+function PushNotificationSection() {
+  const [supported, setSupported] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const utils = trpc.useUtils()
+  const { data: status, isLoading: statusLoading } =
+    trpc.notification.status.useQuery()
+
+  const subscribeMutation = trpc.notification.subscribe.useMutation({
+    onSuccess: () => utils.notification.status.invalidate(),
+  })
+  const unsubscribeMutation = trpc.notification.unsubscribe.useMutation({
+    onSuccess: () => utils.notification.status.invalidate(),
+  })
+
+  useEffect(() => {
+    setSupported(isPushSupported())
+  }, [])
+
+  const handleSubscribe = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const sub = await subscribeToPush()
+      await subscribeMutation.mutateAsync(sub)
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Nie udalo sie wlaczyc powiadomien'
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleUnsubscribe = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      // Get current subscription endpoint before unsubscribing
+      const registration = await navigator.serviceWorker.ready
+      const currentSub = await registration.pushManager.getSubscription()
+      const endpoint = currentSub?.endpoint
+
+      await unsubscribeFromPush()
+
+      if (endpoint) {
+        await unsubscribeMutation.mutateAsync({ endpoint })
+      }
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Nie udalo sie wylaczyc powiadomien'
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!supported) {
+    return (
+      <p className="text-sm text-gray-500">
+        Powiadomienia push nie sa wspierane w tej przegladarce.
+      </p>
+    )
+  }
+
+  if (statusLoading) {
+    return <div className="h-10 animate-pulse rounded-lg bg-gray-100" />
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-gray-700">
+          Status:{' '}
+          <span
+            className={
+              status?.subscribed
+                ? 'font-semibold text-green-600'
+                : 'text-gray-500'
+            }
+          >
+            {status?.subscribed ? 'Wlaczone' : 'Wylaczone'}
+          </span>
+        </span>
+        {status?.subscribed ? (
+          <button
+            onClick={handleUnsubscribe}
+            disabled={loading}
+            className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+          >
+            {loading ? 'Wylaczanie...' : 'Wylacz powiadomienia'}
+          </button>
+        ) : (
+          <button
+            onClick={handleSubscribe}
+            disabled={loading}
+            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+          >
+            {loading ? 'Wlaczanie...' : 'Wlacz powiadomienia'}
+          </button>
+        )}
+      </div>
+      {error && <p className="text-sm text-red-600">{error}</p>}
+    </div>
+  )
+}
+
 export default function UstawieniaPage() {
   const { user, logout } = useAuth()
 
@@ -272,6 +383,14 @@ export default function UstawieniaPage() {
             Powiadomienia
           </h2>
           <NotificationSettings />
+        </section>
+
+        {/* Powiadomienia push */}
+        <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500">
+            Powiadomienia push
+          </h2>
+          <PushNotificationSection />
         </section>
 
         {/* Klucz API */}
