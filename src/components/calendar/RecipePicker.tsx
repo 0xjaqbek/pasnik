@@ -16,12 +16,12 @@ export function RecipePicker({ onSelect, onClose }: RecipePickerProps) {
   })
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-md rounded-xl bg-white shadow-xl">
+      <div className="relative max-h-[80vh] w-full max-w-md overflow-hidden rounded-xl bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-gray-100 p-4">
           <h3 className="text-lg font-semibold text-gray-900">
             Wybierz przepis

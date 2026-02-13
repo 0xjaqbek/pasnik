@@ -171,7 +171,7 @@ export function RecipeForm({ mode, initialData }: RecipeFormProps) {
       </div>
 
       {/* Servings + Prep time + Cook time */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div>
           <label htmlFor="servings" className="mb-1 block text-sm font-medium text-gray-700">
             Porcje
@@ -222,62 +222,66 @@ export function RecipeForm({ mode, initialData }: RecipeFormProps) {
         {errors.ingredients && <p className="mb-2 text-xs text-red-600">{errors.ingredients}</p>}
         <div className="space-y-2">
           {ingredients.map((ing, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Nazwa"
-                value={ing.name}
-                onChange={(e) => updateIngredient(index, 'name', e.target.value)}
-                className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-              />
-              <input
-                type="number"
-                placeholder="Ilosc"
-                min="0"
-                step="any"
-                value={ing.quantity}
-                onChange={(e) =>
-                  updateIngredient(
-                    index,
-                    'quantity',
-                    e.target.value === '' ? '' : parseFloat(e.target.value) || 0
-                  )
-                }
-                className="w-20 rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-              />
-              <select
-                value={ing.unit}
-                onChange={(e) => updateIngredient(index, 'unit', e.target.value)}
-                className="w-16 rounded-lg border border-gray-200 bg-white px-1 py-2 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-              >
-                {unitOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              <label className="flex shrink-0 items-center gap-1 text-xs text-gray-500">
+            <div key={index} className="rounded-lg border border-gray-100 p-2">
+              <div className="flex items-center gap-2">
                 <input
-                  type="checkbox"
-                  checked={ing.optional}
-                  onChange={(e) => updateIngredient(index, 'optional', e.target.checked)}
-                  className="rounded border-gray-300"
+                  type="text"
+                  placeholder="Nazwa"
+                  value={ing.name}
+                  onChange={(e) => updateIngredient(index, 'name', e.target.value)}
+                  className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                 />
-                Opc.
-              </label>
-              {ingredients.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeIngredient(index)}
-                  className="shrink-0 rounded-full p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
-                  aria-label="Usun skladnik"
+                {ingredients.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeIngredient(index)}
+                    className="shrink-0 rounded-full p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
+                    aria-label="Usun skladnik"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              <div className="mt-1.5 flex items-center gap-2">
+                <input
+                  type="number"
+                  placeholder="Ilosc"
+                  min="0"
+                  step="any"
+                  value={ing.quantity}
+                  onChange={(e) =>
+                    updateIngredient(
+                      index,
+                      'quantity',
+                      e.target.value === '' ? '' : parseFloat(e.target.value) || 0
+                    )
+                  }
+                  className="w-20 rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                />
+                <select
+                  value={ing.unit}
+                  onChange={(e) => updateIngredient(index, 'unit', e.target.value)}
+                  className="w-16 rounded-lg border border-gray-200 bg-white px-1 py-2 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              )}
+                  {unitOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <label className="flex shrink-0 items-center gap-1 text-xs text-gray-500">
+                  <input
+                    type="checkbox"
+                    checked={ing.optional}
+                    onChange={(e) => updateIngredient(index, 'optional', e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  Opc.
+                </label>
+              </div>
             </div>
           ))}
         </div>

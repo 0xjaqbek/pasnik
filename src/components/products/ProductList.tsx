@@ -56,7 +56,7 @@ export function ProductList() {
       </div>
 
       {/* Search and category filter */}
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <div className="relative flex-1">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -82,7 +82,7 @@ export function ProductList() {
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as ProductCategory | '')}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 sm:w-auto"
         >
           {categoryOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>

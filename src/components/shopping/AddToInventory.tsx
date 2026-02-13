@@ -100,33 +100,35 @@ export function AddToInventory({ checkedItems }: AddToInventoryProps) {
               return (
                 <div
                   key={item.id}
-                  className="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 p-2"
+                  className="rounded-lg border border-gray-100 bg-gray-50 p-2"
                 >
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">
+                  <span className="block truncate text-sm font-medium text-gray-900">
                     {item.name}
                   </span>
-                  <select
-                    value={settings.location}
-                    onChange={(e) =>
-                      updateSetting(item.id, 'location', e.target.value)
-                    }
-                    className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-900 outline-none"
-                  >
-                    {locationOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    type="date"
-                    value={settings.expiryDate}
-                    onChange={(e) =>
-                      updateSetting(item.id, 'expiryDate', e.target.value)
-                    }
-                    className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-900 outline-none"
-                    placeholder="Waznosc"
-                  />
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                    <select
+                      value={settings.location}
+                      onChange={(e) =>
+                        updateSetting(item.id, 'location', e.target.value)
+                      }
+                      className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-900 outline-none"
+                    >
+                      {locationOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="date"
+                      value={settings.expiryDate}
+                      onChange={(e) =>
+                        updateSetting(item.id, 'expiryDate', e.target.value)
+                      }
+                      className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-900 outline-none"
+                      placeholder="Waznosc"
+                    />
+                  </div>
                 </div>
               )
             })}
