@@ -70,9 +70,6 @@ export function AddToInventory({ checkedItems }: AddToInventoryProps) {
 
   if (checkedItems.length === 0) return null
 
-  const inputClass =
-    'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500'
-
   return (
     <div className="fixed bottom-20 left-0 right-0 z-30 border-t border-gray-200 bg-white px-4 py-3 shadow-lg">
       {successMessage && (

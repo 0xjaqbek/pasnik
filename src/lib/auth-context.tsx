@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useMemo, useCallback, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { trpc } from '@/lib/trpc/client'
 
@@ -21,52 +21,52 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
+function getStoredToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem('token')
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
-  const [token, setToken] = useState<string | null>(null)
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [token, setToken] = useState<string | null>(() => getStoredToken())
+  // loginUser holds the user set directly via login() before the query resolves
+  const [loginUser, setLoginUser] = useState<User | null>(null)
+
+  const hasToken = token !== null
 
   const meQuery = trpc.auth.me.useQuery(undefined, {
-    enabled: token !== null,
+    enabled: hasToken,
     retry: false,
   })
 
-  useEffect(() => {
-    const stored = localStorage.getItem('token')
-    if (stored) {
-      setToken(stored)
-    } else {
-      setLoading(false)
-    }
-  }, [])
+  // Derive user and loading from query state
+  const user = useMemo(() => {
+    if (loginUser) return loginUser
+    if (hasToken && meQuery.data) return meQuery.data as User
+    return null
+  }, [loginUser, hasToken, meQuery.data])
 
-  useEffect(() => {
-    if (!token) return
+  const loading = hasToken && !loginUser && meQuery.isLoading
 
-    if (meQuery.data) {
-      setUser(meQuery.data as User)
-      setLoading(false)
-    } else if (meQuery.data === null || meQuery.isError) {
-      // Token invalid
+  // Handle invalid token: if query errored, clear token on next render
+  if (hasToken && meQuery.isError && !loginUser) {
+    // Schedule cleanup without using useEffect
+    queueMicrotask(() => {
       localStorage.removeItem('token')
       setToken(null)
-      setUser(null)
-      setLoading(false)
-    }
-  }, [token, meQuery.data, meQuery.isError])
+    })
+  }
 
   const login = useCallback((newToken: string, newUser: User) => {
     localStorage.setItem('token', newToken)
     setToken(newToken)
-    setUser(newUser)
-    setLoading(false)
+    setLoginUser(newUser)
   }, [])
 
   const logout = useCallback(() => {
     localStorage.removeItem('token')
     setToken(null)
-    setUser(null)
+    setLoginUser(null)
     router.push('/login')
   }, [router])
 

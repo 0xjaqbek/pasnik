@@ -3,7 +3,6 @@
 import { trpc } from '@/lib/trpc/client'
 import { ShoppingItem } from './ShoppingItem'
 import { AddToInventory } from './AddToInventory'
-import type { ProductCategory } from '@/generated/prisma/enums'
 
 const categoryLabels: Record<string, string> = {
   NABIAL: 'Nabial',

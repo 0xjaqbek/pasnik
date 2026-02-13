@@ -2,11 +2,16 @@ import { NextResponse } from 'next/server'
 import webpush from 'web-push'
 import { prisma } from '@/lib/prisma'
 
-webpush.setVapidDetails(
-  'mailto:admin@pasnik.app',
-  process.env.VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
+function getWebPush() {
+  if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(
+      'mailto:admin@pasnik.app',
+      process.env.VAPID_PUBLIC_KEY,
+      process.env.VAPID_PRIVATE_KEY
+    )
+  }
+  return webpush
+}
 
 function getMealLabel(type: string) {
   const labels: Record<string, string> = {
@@ -24,6 +29,11 @@ export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const push = getWebPush()
+  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+    return NextResponse.json({ error: 'VAPID keys not configured' }, { status: 500 })
   }
 
   const today = new Date()
@@ -132,7 +142,7 @@ export async function GET(request: Request) {
     for (const sub of user.pushSubscriptions) {
       for (const body of notifications) {
         try {
-          await webpush.sendNotification(
+          await push.sendNotification(
             {
               endpoint: sub.endpoint,
               keys: { p256dh: sub.p256dh, auth: sub.auth },
