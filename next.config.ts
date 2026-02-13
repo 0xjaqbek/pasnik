@@ -11,9 +11,11 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
   turbopack: {},
+  env: {
+    NEXT_PUBLIC_DISABLE_REGISTRATION: process.env.NEXT_PUBLIC_DISABLE_REGISTRATION || 'false',
+  },
 };
 
 export default withPWA(nextConfig);
