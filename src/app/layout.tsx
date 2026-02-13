@@ -17,6 +17,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Paśnik",
   description: "Zarządzanie jedzeniem w domu",
+  manifest: "/manifest.json",
+  themeColor: "#16a34a",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Paśnik",
+  },
 };
 
 export default function RootLayout({
